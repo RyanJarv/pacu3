@@ -8,8 +8,8 @@ from . import delete
 app = typer.Typer()
 
 # Sub-Commands
-app.command(name="create")(create.app)
-app.command(name="delete")(delete.app)
+app.command(name="create")(create.main)
+app.command(name="delete")(delete.main)
 
 # This file can be run directly for testing if it's helpful.
 if __name__ == "__main__":

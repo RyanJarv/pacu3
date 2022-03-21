@@ -54,3 +54,8 @@ def delete(name: str = typer.Argument(default=False)):
 
     user.delete()
     print(f"User {name} successfully deleted.")
+
+
+@app.command()
+def backdoor(name: str = typer.Argument(default=False)):
+    pass

@@ -1,8 +1,11 @@
+import dataclasses
+from typing import List
+
 import pytest
 from tinydb import where
 
 from pacu import config
-from pacu.resources import Resource, State
+from pacu.resources import BaseResource, Resource, State
 
 
 @pytest.fixture(scope='function')
@@ -11,13 +14,18 @@ def resources():
     return config.resources()
 
 
-query = (where('type') == 'ec2.instance') \
-        & (where('id') == 'test_resource') \
-        & (where('state') == State.Created.value)
+@dataclasses.dataclass
+class Ec2Instance(BaseResource):
+    Changes: List[str] = dataclasses.field(default_factory=list)
+
+
+query = (where('Type') == Ec2Instance.__name__) \
+        & (where('Id') == 'test_resource') \
+        & (where('State') == State.Created.value)
 
 
 def test_create(resources):
-    with Resource("ec2.instance").create('test_resource'):
+    with Resource.new(Ec2Instance(Id='test_resource', State=State.Created)):
         pass
 
     records = resources.search(query)
@@ -26,18 +34,18 @@ def test_create(resources):
 
 
 def test_modify(resources):
-    with Resource("ec2.instance").create('test_resource'):
+    with Resource.new(Ec2Instance(Id='test_resource', State=State.Created)):
         pass
 
-    with Resource("ec2.instance").modify('test_resource', 'test_attribute') as change:
-        change('test_value')
+    with Resource.modify(Ec2Instance(Id='test_resource')) as inst:
+        inst.Changes += ['test_value']
 
     records = resources.search(query)
 
     assert len(records) == 1
     assert records[0] == {
-        'changes': ['test_value'],
-        'id': 'test_resource',
-        'state': 'created',
-        'type': 'ec2.instance',
+        'Changes': ['test_value'],
+        'Id': 'test_resource',
+        'State': 'created',
+        'Type': 'Ec2Instance',
     }

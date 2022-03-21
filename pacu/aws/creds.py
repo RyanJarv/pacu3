@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
-import argparse
 import re
+import typer
 import typing
+
 from enum import Enum
 
 import boto3
-import typer
+
 from botocore.exceptions import ClientError
 from typer import colors, echo
 from typing import Optional
 
-# Checks if the active set of keys are known to be honeytokens.',
-
-# This module checks if the active set of keys are known to be honeytokens and in the process, it enumerates some
-# identifying information about the keys. All of this is done without ever leaving a log in CloudTrail, because it
-# uses AWS SimpleDB for enumeration, which CloudTrail does not support. Note: Even if you know your keys are not honey
-# keys, this module can be used to enumerate information like the account ID, user/role path, user/role name, and role
-# session name if there is one.',
+from pacu.aws.lib import creds
 
 app = typer.Typer()
 
@@ -26,19 +21,34 @@ if typing.TYPE_CHECKING:
     from mypy_boto3_sdb import Client
 
 
-@app.command
-def add():
-    # TODO: Add these keys to the keystore (when we figure out what that should be)
-    echo("Not implemented", color=colors.RED)
-    return
-
-
 class HoneyTokenResult(Enum):
     Unknown = 1
     IsHoneyToken = 2
     Safe = 3
 
 
+@app.command()
+def add(name: str, access_key: str, secret_key: str, session_token: str = typer.Argument(None)):
+    # TODO: Add these keys to the keystore (when we figure out what that should be)
+    creds.add(name, access_key, secret_key, session_token)
+    typer.echo("Added", color=colors.GREEN)
+
+    # if cred.honey_token_check() == HoneyTokenResult.IsHoneyToken:
+    #     typer.echo("Is honeytoken!", color=colors.RED)
+
+
+@app.command()
+def list():
+    for cred in creds.list():
+        print(f"{cred.Id}: {cred.AccessKey}")
+
+
+@app.command()
+def use(name: str):
+    creds.use(name)
+
+
+@app.command()
 def honey_token_check(access_key_id: str, secret_access_key: str, session_token: Optional[str]) -> HoneyTokenResult:
     sess = boto3.Session(
         aws_access_key_id=access_key_id,

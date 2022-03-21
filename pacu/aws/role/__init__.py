@@ -7,8 +7,8 @@ from . import trust
 app = typer.Typer()
 
 # Sub-Commands
-app.command(name="create")(create.app)
-app.command(name="delete")(delete.app)
+app.command(name="create")(create.main)
+app.command(name="delete")(delete.main)
 
 # Sub-Modules
 app.add_typer(trust.app, name='trust')

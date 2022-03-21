@@ -135,7 +135,3 @@ def get_instance(svc: 'ec2_t.ServiceResource', name: str) -> Optional['ec2_t.ser
         return None
 
     return insts[0]
-
-
-def _list():
-    raise NotImplemented

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope='function')
-def _role(iam, sts):
+def role(iam, sts):
     create.main('test_role')
     _test_role = iam.Role('test_role')
     _test_role.load()
@@ -22,12 +22,12 @@ def _role(iam, sts):
     yield _test_role
 
 
-def test_role(_role):
-    assert _role.name == 'test_role'
+def test_role(role):
+    assert role.name == 'test_role'
 
 
-def test_delete(iam: 'ServiceResource', _role):
-    delete.main(_role.name)
+def test_delete(iam: 'ServiceResource', role):
+    delete.main(role.name)
 
     with pytest.raises(iam.meta.client.exceptions.NoSuchEntityException):
-        iam.User(_role.name).load()
+        iam.User(role.name).load()
