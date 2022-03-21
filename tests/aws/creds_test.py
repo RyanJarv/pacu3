@@ -1,8 +1,5 @@
 from unittest import mock
 
-import boto3
-import pytest
-
 import botocore.exceptions
 import botocore.session
 from botocore.stub import Stubber

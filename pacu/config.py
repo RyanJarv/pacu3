@@ -33,4 +33,4 @@ from pathlib import Path
 #     return TinyDB(Path(typer.get_app_dir('pacu')/'config'))
 
 def resources():
-    return TinyDB(Path(typer.get_app_dir('pacu')/'resources'))
+    return TinyDB(Path(typer.get_app_dir('pacu'))/'resources')

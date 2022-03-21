@@ -1,28 +1,28 @@
 import typing
-from enum import Enum
-
 import typer
-
 import boto3
-import botocore.errorfactory
-from boto3.resources.base import ServiceResource
 
+from enum import Enum
 from pacu.resources import Resource
+from typing import Optional, TYPE_CHECKING
 
 app = typer.Typer()
-
-from typing import Optional, TYPE_CHECKING
 
 # Allows for type completion of boto3 in some editors. There is no need for to get imported
 # during runtime though.
 if TYPE_CHECKING:
-    from mypy_boto3_ec2 import ServiceResource, service_resource
+    import mypy_boto3_ec2 as ec2_t
 
 
 @app.command()
-def create(name: str = typer.Argument(default=False)):
+def create(
+        name: str = typer.Argument(default=False),
+        subnet: str = typer.Argument(default=False),
+        security_group: str = typer.Argument(default=False),
+        key_pair: str = typer.Argument(default=False),
+):
     svc = boto3.resource('ec2')
-    print(_create(svc, name).id)
+    print(_create(svc, name, subnet, security_group, key_pair).id)
 
 
 # TODO: Improve aws.ec2._create
@@ -42,12 +42,12 @@ def create(name: str = typer.Argument(default=False)):
 #     * Should it even be tagged?
 #     * Ensure their is no duplicates.
 def _create(
-        svc: ServiceResource,
+        svc: 'ec2_t.ServiceResource',
         name: str,
-        subnet: 'Subnet',
-        security_group: 'SecurityGroup',
-        key_pair: 'KeyPair',
-) -> 'service_resource.Instance':
+        subnet: str,
+        security_group: str,
+        key_pair: str,
+) -> 'ec2_t.service_resource.Instance':
 
     with Resource("ec2.instance").create(name):
         """create will create a new IAM user with administrative permissions."""
@@ -59,9 +59,9 @@ def _create(
             MaxCount=1,
             MinCount=1,
             Monitoring={'Enabled': False},
-            SecurityGroupIds=[security_group.resource.id],
-            KeyName=key_pair.resource.name,
-            SubnetId=subnet.resource.id,
+            SecurityGroupIds=[security_group],
+            KeyName=key_pair,
+            SubnetId=subnet,
             # UserData='string',
             # IamInstanceProfile={
             #     'Arn': 'string',
@@ -90,12 +90,22 @@ def _create(
 
 
 @app.command()
+def modify_userdata(name: str = typer.Argument(default=False)):
+    raise NotImplemented
+
+
+def _modify_userdata(svc: 'ec2_t.ServiceResource', name: str, userdata: str):
+    inst = get_instance(svc, name)
+    inst.modify_attribute(UserData={"Value": userdata.encode()})
+
+
+@app.command()
 def delete(name: str = typer.Argument(default=False)):
     svc = boto3.resource('ec2')
     print(svc, _delete(svc, name))
 
 
-def _delete(svc: ServiceResource, name: str = typer.Argument(default=False)):
+def _delete(svc: 'ec2_t.ServiceResource', name: str = typer.Argument(default=False)):
     with Resource("ec2.instance").delete(name):
         inst = get_instance(svc, name)
         if inst is None:
@@ -104,7 +114,7 @@ def _delete(svc: ServiceResource, name: str = typer.Argument(default=False)):
         return inst.terminate()
 
 
-def get_name(inst: 'service_resource.Instance') -> Optional[str]:
+def get_name(inst: 'ec2_t.service_resource.Instance') -> Optional[str]:
     if inst.tags is None:
         return None
 
@@ -115,7 +125,7 @@ def get_name(inst: 'service_resource.Instance') -> Optional[str]:
     return name_tag[0]['Value'].removeprefix("pacu-")
 
 
-def get_instance(svc: 'ServiceResource', name: str) -> Optional['service_resource.Instance']:
+def get_instance(svc: 'ec2_t.ServiceResource', name: str) -> Optional['ec2_t.service_resource.Instance']:
     insts = list(svc.instances.filter(Filters=[{
         "Name": "tag:Name",
         "Values": [f"pacu-{name}"],
@@ -129,62 +139,3 @@ def get_instance(svc: 'ServiceResource', name: str) -> Optional['service_resourc
 
 def _list():
     raise NotImplemented
-
-
-def _modify_userdata(name, new_user_data):
-    return None
-
-
-class Vpc:
-    def __init__(self, resource: 'service_resource.Vpc'):
-        self.resource = resource
-
-
-def _add_vpc(svc, resource: 'service_resource.Vpc') -> Vpc:
-    return Vpc(resource)
-
-
-class Subnet:
-    def __init__(self, resource: 'service_resource.Subnet'):
-        self.resource = resource
-
-
-def _add_subnet(svc, resource: 'service_resource.Subnet') -> Subnet:
-    return Subnet(resource)
-
-
-class SecurityGroup:
-    def __init__(self, resource: 'service_resource.SecurityGroup'):
-        self.resource = resource
-
-
-def _add_security_group(svc, resource: 'service_resource.SecurityGroup') -> SecurityGroup:
-    return SecurityGroup(resource)
-
-
-class Region:
-    def __init__(self, resource: str):
-        self.resource = resource
-
-
-def _add_region(svc, region_name) -> Region:
-    return Region(region_name)
-
-
-class KeyPair:
-    def __init__(self, resource: 'service_resource.KeyPair'):
-        self.resource = resource
-
-
-def _add_key_pair(svc, resource: 'service_resource.KeyPair') -> KeyPair:
-    return KeyPair(resource)
-
-#
-# class ResourceState(Enum):
-#     Added: str = 'Added'
-#     Created: str = 'Created'
-#
-#
-# class Resource:
-#     def __init__(self, state):
-#         pass

@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from enum import Enum
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import tinydb.table
 from tinydb import where
@@ -16,12 +16,6 @@ class State(Enum):
     Added = "added"
 
 
-@dataclass
-class Resource:
-    id: str
-    state: State
-
-
 # TODO: Check if resources exist before yielding.
 class Resource:
     def __init__(self, _type):
@@ -32,7 +26,7 @@ class Resource:
         try:
             yield
         finally:
-            config.resources().insert({'type': self.type, 'id': _id, 'state': State.Created})
+            config.resources().insert({'type': self.type, 'id': _id, 'state': State.Created.value})
 
 
     @contextmanager
@@ -42,6 +36,20 @@ class Resource:
         finally:
             config.resources().insert({'type': self.type, 'id': _id, 'state': State.Added})
 
+    @contextmanager
+    def modify(self, _id: str, name: str):
+        query = (where('type') == 'ec2.instance') & (where('id') == 'test_resource')
+
+        records = config.resources().search(query)
+        assert len(records) == 1
+        resource = records[0]
+
+        changes = resource.get('changes', {}).get(name, [])
+        try:
+            yield lambda c: changes.append(c)
+            config.resources().update({'changes': changes}, query)
+        finally:
+            config.resources().search((where('type') == self.type) & (where('id') == _id))
 
     @contextmanager
     def delete(self, _id: str):
