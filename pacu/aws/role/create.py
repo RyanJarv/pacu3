@@ -6,9 +6,10 @@ import typer
 import boto3
 import botocore.errorfactory
 
+from policyuniverse.policy import Policy
+
 app = typer.Typer()
 
-from policyuniverse.policy import Policy
 
 # Allows for type completion of boto3 in some editors. There is no need for to get imported
 # during runtime though.
@@ -21,7 +22,7 @@ if typing.TYPE_CHECKING:
 #   * Don't make sts call if possible
 #   * Figure out how to handle the trust_policy.
 @app.command()
-def create(name: str = typer.Argument(default=False)):
+def main(name: str = typer.Argument(default=False)):
     """create will create a new IAM user with administrative permissions."""
     iam = boto3.resource('iam')
 
@@ -51,25 +52,3 @@ def create(name: str = typer.Argument(default=False)):
 
     role.attach_policy(PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess')
     # TODO: add trust
-
-
-@app.command()
-def delete(name: str = typer.Argument(default=False)):
-    """delete will delete the given user."""
-    iam = boto3.resource('iam')
-    role = iam.Role(name)
-
-    for policy in role.attached_policies.all():
-        policy.detach_role(RoleName=role.name)
-
-    role.delete()
-    print(f"User {name} successfully deleted.")
-
-
-@app.command()
-def list():
-    raise NotImplemented
-
-
-def _list():
-    raise NotImplemented
