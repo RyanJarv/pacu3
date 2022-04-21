@@ -17,7 +17,7 @@ def main(name: str, arn: str):
     iam = boto3.resource('iam')
 
     role = iam.Role(name)
-    policy: dict = role.assume_role_policy_document
+    policy: dict = role.assume_role_policy_document  # type: ignore
 
     policy['Statement'].append(Statement(dict(
         Effect='Allow',

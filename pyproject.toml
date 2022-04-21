@@ -45,6 +45,7 @@ pytest = ">=5.3.2"
 
 [tool.poetry.scripts]
 pacu = "pacu.cli:app"
+paws = "pacu.aws:app"
 
 [tool.black]
 target-version = ["py38", "py39"]

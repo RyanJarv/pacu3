@@ -1,4 +1,5 @@
 import os
+import re
 
 import boto3
 import pytest
@@ -25,3 +26,9 @@ def iam(aws_credentials):
 def sts(aws_credentials):
     with mock_sts():
         yield boto3.resource('iam', region_name='us-east-1')
+
+
+def clean_arn(arn: str):
+    """Take an ARN that may be found in CloudTrail and return the principal ARN."""
+    return re.sub(':assumed-role/', 'role/', arn)
+
