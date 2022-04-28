@@ -5,7 +5,7 @@ import pytest
 from tinydb import where
 
 from pacu import config
-from pacu.resources import BaseResource, Resource, State
+from pacu.repo import BaseResource, Resource, State
 
 
 @pytest.fixture(scope='function')

@@ -1,36 +1,68 @@
-import json
-from typing import Union, cast
-from tinydb import TinyDB, Query
-
-import typer
-from pathlib import Path
-
-
-# def set(key: str, value: any):
-#     (Path(typer.get_app_dir('pacu')) / 'config' / key).write_text(json.dumps(value))
-#
-#
-# def append(key: str, value: any):
-#     obj = get(key)
-#
-#     if obj is None:
-#         obj = []
-#     elif type(obj) is list:
-#         raise TypeError(f"existing configuration on disk is of type '{type(obj)}', expected a list.")
-#     else:
-#         obj = cast(list, obj)
-#
-#     set(key, obj.append(value))
-#
-#
-# def get(key: str) -> any:
-#     try:
-#         return json.loads(Path(typer.get_app_dir('pacu')/'config'/ key).read_text())
-#     except FileNotFoundError:
-#         return None
-#
-# def config():
-#     return TinyDB(Path(typer.get_app_dir('pacu')/'config'))
-
-def resources():
-    return TinyDB(Path(typer.get_app_dir('pacu'))/'resources')
+blacklist = {
+    "devicefarm": [
+        "ListDevices",
+        # network timeout (I think due to feature needing out of band enabling by AWS)
+        "ListOfferingTransactions",
+    ],
+    "ec2": [
+        # return way too much (unrelated) data
+        "DescribeHostReservationOfferings",
+        "DescribeImages",
+        "DescribeRegions",
+        "DescribeReservedInstancesOfferings",
+        "DescribeSnapshots",
+        "DescribeSpotPriceHistory",
+    ],
+    "elasticache": [
+        # return way too much (unrelated) data
+        "DescribeCacheEngineVersions",
+        "DescribeReservedCacheNodesOfferings",
+    ],
+    "elasticbeanstalk": [
+        # return way too much (unrelated) data
+        "DescribeConfigurationOptions",
+        "DescribeEnvironmentResources",
+        "DescribePlatformVersion",
+        "ListAvailableSolutionStacks",
+    ],
+    "elastictranscoder": [
+        # return way too much (unrelated) data
+        "ListPresets",
+    ],
+    "elbv2": [
+        # need a parameter
+        "DescribeListeners",
+    ],
+    "opsworks": [
+        # need a parameter
+        "DescribeAgentVersions",
+        "DescribeApps",
+        "DescribeCommands",
+        "DescribeDeployments",
+        "DescribeEcsClusters",
+        "DescribeElasticIps",
+        "DescribeElasticLoadBalancers",
+        "DescribeInstances",
+        "DescribeLayers",
+        "DescribePermissions",
+        "DescribeRaidArrays",
+        "DescribeVolumes",
+    ],
+    "rds": [
+        # return way too much (unrelated) data
+        "DescribeDBEngineVersions",
+        "DescribeReservedDBInstancesOfferings",
+    ],
+    "workdocs": [
+        # need a parameter
+        "DescribeUsers",
+    ],
+    "importexport": [
+        # slow
+        "ListJobs",
+    ],
+    "worklink": [
+        # deprecated?
+        "ListFleets",
+    ],
+}

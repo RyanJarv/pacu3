@@ -1,6 +1,8 @@
 import threading
+from pathlib import Path
 
 import networkx
+import typer
 
 from pacu.aws.lib.lq import Lq
 from pacu.aws.lib.role import Role
@@ -24,3 +26,11 @@ def has_assumed(graph: networkx.Graph, src: Role, dst_arn: str) -> bool:
             return True
 
     return False
+
+
+def get_data_dir():
+    return Path(typer.get_app_dir('pacu')) / 'data'
+
+
+def get_aws_data_dir():
+    return get_data_dir() / 'aws' / 'responses'
