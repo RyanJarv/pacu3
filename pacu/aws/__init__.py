@@ -7,6 +7,7 @@ from . import user
 from . import utils
 from . import role
 from . import ingest
+from . import resources
 
 app = typer.Typer(help='Modules relating to AWS', short_help='Modules relating to AWS.')
 
@@ -14,6 +15,7 @@ app = typer.Typer(help='Modules relating to AWS', short_help='Modules relating t
 app.add_typer(user.app, name='users')
 app.add_typer(role.app, name='role')
 app.add_typer(creds.app, name='creds')
+app.add_typer(resources.app, name='resources')
 
 # I'm sure there's a better way to do this, but this works for now.
 # We just want these to show up directly under the `pacu aws` subcommand.

@@ -1,6 +1,4 @@
 import functools
-import json
-import os
 from pathlib import Path
 from typing import Optional
 
@@ -49,19 +47,19 @@ def main(
         model = op_model(svc, call)
 
         pass
-        if obj.get('ResponseMetadata'):
-            del obj['ResponseMetadata']
-        for k, v in obj.items():
-            if not v:
-                continue
-            _t = type(v)
-            if _t == list:
-                print('list size: ' + str(len(v)))
-            elif _t in [str, int, bool]:
-                print(v)
-            elif _t == dict:
-                print(v.keys())
-            else:
-                import pdb; pdb.set_trace()
-            # print(type(v))
-            # print(f"{k}: {v}")
+        # if obj.get('ResponseMetadata'):
+        #     del obj['ResponseMetadata']
+        # for k, v in obj.items():
+        #     if not v:
+        #         continue
+        #     _t = type(v)
+        #     if _t == list:
+        #         print('list size: ' + str(len(v)))
+        #     elif _t in [str, int, bool]:
+        #         print(v)
+        #     elif _t == dict:
+        #         print(v.keys())
+        #     else:
+        #         import pdb; pdb.set_trace()
+        #     # print(type(v))
+        #     # print(f"{k}: {v}")

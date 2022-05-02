@@ -1,3 +1,6 @@
+# Mostly a hack for now to avoid including uninteresting info.
+# TODO: Find a better way to do this. Probably run against a fresh account, and make a blacklist
+#  of what not to blacklist (like the default vpc).
 blacklist = {
     "devicefarm": [
         "ListDevices",
@@ -8,10 +11,19 @@ blacklist = {
         # return way too much (unrelated) data
         "DescribeHostReservationOfferings",
         "DescribeImages",
-        "DescribeRegions",
+        #"DescribeRegions",
         "DescribeReservedInstancesOfferings",
         "DescribeSnapshots",
         "DescribeSpotPriceHistory",
+        # Always the same
+        "DescribeInstanceTypes",
+        "DescribeInstanceTypeOfferings",
+        # Need to filter out public images
+        "DescribeFpgaImages",
+        # likely static
+        "DescribeIdFormat",
+        # need to filter out non-amazon endpoints
+        "DescribeVpcEndpointServices",
     ],
     "elasticache": [
         # return way too much (unrelated) data
@@ -24,6 +36,8 @@ blacklist = {
         "DescribeEnvironmentResources",
         "DescribePlatformVersion",
         "ListAvailableSolutionStacks",
+        # Has useful info, but likely doesn't change per customer.
+        "ListPlatformVersions",
     ],
     "elastictranscoder": [
         # return way too much (unrelated) data
@@ -65,4 +79,67 @@ blacklist = {
         # deprecated?
         "ListFleets",
     ],
+    "cloudwatch": [
+        # not interesting
+        "ListMetrics",
+        "ListMetricStreams",
+    ],
+    "cloudformation": [
+        # not interesting
+        "ListTypeRegistrations",
+        "DescribeAccountLimits",
+    ],
+    "dms": [
+        # not interesting
+        "DescribeOrderableReplicationInstances",
+        # not per customer
+        "DescribeEndpointTypes",
+    ],
+    "docdb": [
+        # not interesting
+        "DescribeDBEngineVersions",
+    ],
+    "service-quotas": [
+        # not interesting
+        "ListServices",
+    ],
+    "neptune": [
+        # not interesting
+        "DescribeDBEngineVersions",
+    ],
+    "emr": [
+        # probably all the same
+        "ListReleaseLabels",
+    ],
+    "route53": [
+        # looks static
+        "ListGeoLocations",
+    ],
+    "es": [
+        # static
+        "DescribeReservedElasticsearchInstanceOfferings",
+    ],
+    "savingsplans": [
+        # probably not interesting
+        "DescribeSavingsPlans",
+        "DescribeSavingsPlansOfferings",
+        "DescribeSavingsPlansOfferingRates",
+    ],
+    "route53domains": [
+        # not interesting
+        "ListPrices",
+    ],
+    "mediaconnect": [
+        # not interesting
+        "ListOfferings",
+    ],
+    "pricing": [
+        # not interesting
+        "DescribeServices",
+    ],
+    "ssm": [
+        "DescribeAvailablePatches",
+        # Need to filter by owner
+        "ListDocuments",
+    ]
 }
