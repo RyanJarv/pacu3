@@ -1,4 +1,3 @@
-import dataclasses
 import enum
 import botocore.session
 import botocore.client
@@ -72,7 +71,7 @@ class Role(Access):
         }
 
     def credentials(self) -> Optional[Dict[str, str]]:
-        for edge in networkx.bfs_predecessors(self.graph, self, depth_limit=1):
+        for edge in networkx.bfs_predecessors(self.graph, self.arn, depth_limit=1):
             # TODO: Catch credential error and continue to next
-            return edge[0]._assume(self.arn)
+            return self.graph.nodes[edge[0]]['role']._assume(self.arn)
         return None

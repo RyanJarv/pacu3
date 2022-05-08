@@ -9,12 +9,15 @@ from botocore.model import OperationModel
 from pacu.lib.utils import get_data_dir
 
 
-def get_data_files(cloud=None, region=None, svc=None):
+def get_data_files(cloud=None, profile=None, region=None, svc=None):
     p = get_data_dir()
 
     glob = Path('')
     if cloud:
         glob = glob / cloud
+
+    if profile:
+        glob = glob / profile
 
     if region:
         glob = glob / region
@@ -37,29 +40,14 @@ def op_model(svc, op) -> OperationModel:
 
 
 def main(
-        cloud: Optional[str] = typer.Argument(None),
         profile: Optional[str] = typer.Argument(None),
         region: Optional[str] = typer.Argument(None),
         svc: Optional[str] = typer.Argument(None),
 ):
-    for f in get_data_files(cloud='aws'):
-        cloud, region, svc, call = f.parts
-        model = op_model(svc, call)
+    list_resources(profile, region, svc)
 
-        pass
-        # if obj.get('ResponseMetadata'):
-        #     del obj['ResponseMetadata']
-        # for k, v in obj.items():
-        #     if not v:
-        #         continue
-        #     _t = type(v)
-        #     if _t == list:
-        #         print('list size: ' + str(len(v)))
-        #     elif _t in [str, int, bool]:
-        #         print(v)
-        #     elif _t == dict:
-        #         print(v.keys())
-        #     else:
-        #         import pdb; pdb.set_trace()
-        #     # print(type(v))
-        #     # print(f"{k}: {v}")
+
+def list_resources(profile=None, region=None, svc=None):
+    for f in get_data_files(cloud='aws', profile=profile, region=region, svc=svc):
+        cloud, profile, _, region, svc, call = f.parts
+        print(f"{cloud} {profile} {region} {svc} {call}")

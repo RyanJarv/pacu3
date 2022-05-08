@@ -1,15 +1,10 @@
-import dataclasses
 from unittest import mock
 
 import botocore.exceptions
 import botocore.session
-import pytest
 from botocore.stub import Stubber
-from tinydb import where
 
-from pacu import config
-from pacu.aws.creds import AwsCredential, _add, _list, honey_token_check, HoneyTokenResult
-from tests.aws.lib.config_test import cred
+from pacu.aws.creds import honey_token_check, HoneyTokenResult
 
 
 def auth_error(msg: str):

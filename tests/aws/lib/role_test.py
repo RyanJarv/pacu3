@@ -13,8 +13,8 @@ from pacu.aws.lib.role import Role
 @pytest.fixture(scope='function')
 def graph():
     graph = networkx.Graph()
-    role = Role(graph)
-    graph.add_node(role)
+    role = Role(graph, arn="arn:aws:iam::336983520827:role/test")
+    graph.add_node(role.arn, role=role)
     yield graph
 
 
@@ -56,12 +56,16 @@ def test_assume_role_chain(sts):
     graph = networkx.Graph()
 
     src = Role(graph, "arn:aws:iam::336983520827:role/source", boto3.Session(region_name='us-east-1'))
-    second = Role(graph, "arn:aws:iam::336983520827:role/source", boto3.Session(region_name='us-east-1'))
-    third = Role(graph, "arn:aws:iam::336983520827:role/dest")
+    graph.add_node(src.arn, role=src)
 
-    graph.add_nodes_from([src, second, third])
-    graph.add_edge(src, second)
-    graph.add_edge(second, third)
+    second = Role(graph, "arn:aws:iam::336983520827:role/source", boto3.Session(region_name='us-east-1'))
+    graph.add_node(second.arn, role=second)
+
+    third = Role(graph, "arn:aws:iam::336983520827:role/dest")
+    graph.add_node(third.arn, role=third)
+
+    graph.add_edge(src.arn, second.arn)
+    graph.add_edge(second.arn, third.arn)
 
     # moto seems to return random creds for assume-role
     assert third.credentials()['access_key'].startswith('ASIA')

@@ -1,3 +1,4 @@
+import logging
 import re
 import typing
 from datetime import datetime, timedelta
@@ -12,6 +13,8 @@ if typing.TYPE_CHECKING:
 
 arn_re = r'arn:aws:iam::[0-9]{12}:(?:role|assumed-role)/[-a-zA-Z_0-9+=,.@_/]+'
 
+logging = logging.getLogger('cloudtrail')
+
 
 class CloudTrailRoleSearch:
     def __init__(self, graph: networkx.Graph, discovered_queue: Lq, access_queue: Lq):
@@ -21,6 +24,7 @@ class CloudTrailRoleSearch:
 
     def run(self):
         for role in self.access_queue.each():
+            logging.info(f"searching cloudtrail logs with {role.arn}")
             self.search_cloudtrail(role)
 
     def search_cloudtrail(self, role: Role):
@@ -41,8 +45,10 @@ class CloudTrailRoleSearch:
                 arns = re.findall(arn_re, event['CloudTrailEvent'])
 
                 for arn in filter(self._is_unique, arns):
-                    print(f"found arn: {arn}")
-                    self.discovered_queue.broadcast(arn)
+                    logging.info(f"found arn: {arn}")
+                    role = Role(self.graph, arn=arn)
+                    self.graph.add_node(arn, role=role)
+                    self.discovered_queue.broadcast(role)
 
     # TODO: Optimize
     def _is_unique(self, arn) -> bool:

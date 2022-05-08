@@ -1,11 +1,10 @@
 import dataclasses
-import json
 import typing
 from contextlib import contextmanager
 from enum import Enum
 
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import tinydb.table
 from tinydb import where
@@ -18,13 +17,12 @@ class State(str, Enum):
     Added = "added"
 
 
-@dataclasses.dataclass(kw_only=True)
+@dataclass(kw_only=True)
 class BaseResource:
     Type: str = dataclasses.field(init=False)
 
     Id: str
     State: Optional[State] = None
-
 
     def __post_init__(self):
         self.Type = self.__class__.__name__

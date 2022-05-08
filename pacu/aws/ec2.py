@@ -3,7 +3,7 @@ import typer
 import boto3
 
 from enum import Enum
-from pacu.repo import Resource
+from pacu.resources import Resource
 from typing import Optional, TYPE_CHECKING
 
 app = typer.Typer()
