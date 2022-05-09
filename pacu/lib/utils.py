@@ -16,16 +16,8 @@ def run_thread(*args, **kwargs):
 
 
 def has_assumed(graph: networkx.Graph, src_arn: str, dst_arn: str) -> bool:
-    """Returns True if an edge exist between the src Role and a role with the arn dst_arn.
-
-    TODO: Probably doesn't make sense to use roles as nodes, can't retrieve the node by
-     ARN or use has_edge if we do that.
-    """
-    for neighbor in graph.neighbors(src):
-        if neighbor.arn == dst_arn:
-            return True
-
-    return False
+    """Returns True if an edge exist between the src Role and a role with the arn dst_arn."""
+    return graph.has_edge(src_arn, dst_arn)
 
 
 def get_data_dir():

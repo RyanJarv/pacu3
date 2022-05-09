@@ -14,7 +14,6 @@ from pacu.aws.lib.role import Role
 def graph():
     graph = networkx.Graph()
     role = Role(graph, arn="arn:aws:iam::336983520827:role/test")
-    graph.add_node(role.arn, role=role)
     yield graph
 
 
@@ -56,13 +55,8 @@ def test_assume_role_chain(sts):
     graph = networkx.Graph()
 
     src = Role(graph, "arn:aws:iam::336983520827:role/source", boto3.Session(region_name='us-east-1'))
-    graph.add_node(src.arn, role=src)
-
     second = Role(graph, "arn:aws:iam::336983520827:role/source", boto3.Session(region_name='us-east-1'))
-    graph.add_node(second.arn, role=second)
-
     third = Role(graph, "arn:aws:iam::336983520827:role/dest")
-    graph.add_node(third.arn, role=third)
 
     graph.add_edge(src.arn, second.arn)
     graph.add_edge(second.arn, third.arn)

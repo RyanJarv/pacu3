@@ -47,11 +47,11 @@ class CloudTrailRoleSearch:
                 for arn in filter(self._is_unique, arns):
                     logging.info(f"found arn: {arn}")
                     role = Role(self.graph, arn=arn)
-                    self.graph.add_node(arn, role=role)
                     self.discovered_queue.broadcast(role)
 
     # TODO: Optimize
     def _is_unique(self, arn) -> bool:
-        if arn in self.discovered_queue.all:
-            return False
+        for role in self.discovered_queue.all:
+            if arn == role.arn:
+                return False
         return True

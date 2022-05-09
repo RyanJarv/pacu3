@@ -13,6 +13,10 @@ class Lq:
     def __init__(self):
         self.queues: List[queue.Queue] = []
         self.all: List[Any] = []  # Track all broadcast events, so we can redeliver to future subscribers.
+        self.lq_dependents = [self]
+
+    def depends_on(self, lq: 'Lq'):
+        self.lq_dependents.append(lq)
 
     def broadcast(self, item: T):
         self.all.append(item)
@@ -26,11 +30,25 @@ class Lq:
         self.queues.append(q)
 
         for event in self.all:
-            yield event
+            q.put(event)
 
-        # If any task is not done then we are still running.
-        running = any((not t.all_tasks_done for t in self.queues))
+        while self.running():
+            try:
+                resp = q.get(block=True, timeout=1)
+                yield resp
+                q.task_done()
+            except queue.Empty:
+                continue
 
-        while running:
-            yield q.get(block=True)
+    def running(self) -> bool:
+        # all dependents need to be checked.
+        for lq in self.lq_dependents:
+            # If there are no queues self.each() has not been called yet.
+            if not lq.queues:
+                return True
+
+            # If any task is not done we are still running.
+            if any((t.unfinished_tasks for t in lq.queues)):
+                return True
+        return False
 
